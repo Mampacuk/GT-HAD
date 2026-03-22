@@ -10,7 +10,7 @@ clc;
 clear;
 close all;
 addpath(genpath('../../data/')); 
-key = 'los-angeles-2';
+key = 'porcine2_696x520x31';
 save_dir=['../../results/', key, '/'];
 if ~isfolder(save_dir)
     mkdir(save_dir);
@@ -25,10 +25,17 @@ mask = double(data.map);
 [rows,cols,bands]=size(hsi);
 label_value=reshape(mask,1,rows*cols);
 
-%% Optimal Parameters       
+%% Optimal Parameters
+if strcmp(key, 'porcine2_348x260x31')
+    w_out = 97;
+    w_in = 47;
+elseif strcmp(key, 'porcine2_696x520x31')
+    w_out = 193;
+    w_in = 97;
+end
 % param:w_out
 % w_out = 9; % los-angeles-1
-w_out = 19; % los-angeles-2
+% w_out = 97; % los-angeles-2
 % w_out = 13; % gulfport 
 % w_out = 9; % texas-goast
 % w_out = 25; % cat-island
@@ -36,7 +43,7 @@ w_out = 19; % los-angeles-2
 
 % param:w_in
 % w_in = 7; % los-angeles-1
-w_in = 15; % los-angeles-2
+% w_in = 47; % los-angeles-2
 % w_in = 11; % gulfport 
 % w_in = 5; % texas-goast
 % w_in = 3; % cat-island

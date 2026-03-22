@@ -3,7 +3,7 @@ clc;
 clear;
 close all;
 addpath(genpath('../../data/')); 
-key = 'gulfport';
+key = 'bovine5.3_174x128x31';
 save_dir=['../../results/', key, '/'];
 if ~isfolder(save_dir)
     mkdir(save_dir);
@@ -13,7 +13,7 @@ end
 disp(key)
 input=[key,'.mat'];
 hsi = load(input);
-DataTest = hsi.data;
+DataTest = double(hsi.data);
 mask = double(hsi.map);
 [H,W,Dim]=size(DataTest);
 num=H*W;
@@ -27,36 +27,19 @@ anomaly_map = logical(double(mask_reshape)>0);
 normal_map = logical(double(mask_reshape)==0);
 Y=reshape(DataTest, num, Dim)';
 
-%% Optimal Parameters       
-% param:¦Ë
-% lambda = 0.5; % los-angeles-1
-% lambda = 0.5; % los-angeles-2
-lambda = 0.5; % gulfport 
-% lambda = 0.05; % texas-goast
-% lambda = 0.05; % cat-island
-% lambda = 0.05; % pavia
-
-% param:¦Â
-% beta = 0.2; % los-angeles-1
-% beta = 0.2; % los-angeles-2
-beta = 0.2; % gulfport 
-% beta = 0.2; % texas-goast
-% beta = 0.2; % cat-island
-% beta = 0.2; % pavia
-
-% param:¦Ã
-% gamma = 0.05; % los-angeles-1
-% gamma = 0.05; % los-angeles-2
-gamma = 0.05; % gulfport 
-% gamma = 0.02; % texas-goast
-% gamma = 0.02; % cat-island
-% gamma = 0.02; % pavia
+%% Optimal Parameters
+lambda = 0.05;
+beta = 0.002;
+gamma = 0.02;
+K = 7;
+P = 30;
 
 %% GTVLRR Method
 disp('Running GTVLRR, Please wait...')
 tic;
-Dict=ConstructionD_lilu(Y,15,20);
-display = false;
+
+Dict=ConstructionD_lilu(Y,K,P);
+display = true;
 [X,S] = lrr_tv_manifold(Y,Dict,lambda,beta,gamma,[H,W],display);
 toc
 

@@ -1,4 +1,4 @@
-function [output_img, stop_flag, s1, index1] = Local_iforest(input_img, data, s, index, lev)  
+function [output_img, stop_flag, s1, index1] = Local_iforest(input_img, data, s, index, lev, a)  
 r0 = input_img;
 row = size(input_img,1);
 col = size(input_img,2);
@@ -10,7 +10,7 @@ index1 = index;
 for i=1:bw_num
     abstract = find(bw_img == i);
     abstract_num = size(abstract,1);
-    if abstract_num >= floor(row*col/120)
+    if abstract_num >= a
         first_flag = first_flag + 1;
         if first_flag == 1
             s1 = s;

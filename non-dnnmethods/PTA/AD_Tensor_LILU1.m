@@ -145,8 +145,8 @@ while (iter <= maxIter) && (sum(abs(res)) > tol2)
         id=(iter-1)/10+1;
          area0(id)=sum((PF0(1:end-1)-PF0(2:end)).*(PD0(2:end)+PD0(1:end-1))/2);
          RES(id)=res(1);
-         % disp(['iter =',num2str(iter),'- res(1) =',num2str(res(1)), ',res(2) =',num2str(res(2)),',res(3) =', num2str(res(3)),',res(4) =', num2str(res(4)),',res(5) =', num2str(res(5)),',AUC=',num2str(area0(id))]);
-%   disp(['iter =',num2str(iter),'- res(1) =',num2str(res(1)), ',res(2) =',num2str(res(2)),',res(3) =', num2str(res(3)),',res(4) =', num2str(res(4)),',res(5) =', num2str(res(5))]);
+         disp(['iter =',num2str(iter),'- res(1) =',num2str(res(1)), ',res(2) =',num2str(res(2)),',res(3) =', num2str(res(3)),',res(4) =', num2str(res(4)),',res(5) =', num2str(res(5)),',AUC=',num2str(area0(id))]);
+  % disp(['iter =',num2str(iter),'- res(1) =',num2str(res(1)), ',res(2) =',num2str(res(2)),',res(3) =', num2str(res(3)),',res(4) =', num2str(res(4)),',res(5) =', num2str(res(5))]);
     end  
     iter = iter + 1;    
     mu = min(mu*rho, mu_bar); 

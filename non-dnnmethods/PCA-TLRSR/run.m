@@ -5,7 +5,7 @@ clc;
 addpath(genpath('./tSVD'));
 addpath(genpath('./proximal_operator'));
 addpath(genpath('../../data/')); 
-key = 'los-angeles-1';
+key = 'porcine4_348x260x31';
 save_dir=['../../results/', key, '/'];
 if ~isfolder(save_dir)
     mkdir(save_dir);
@@ -15,15 +15,12 @@ end
 disp(key)
 input=[key,'.mat'];
 hsi=load(input);
-DataTest = hsi.data;
+DataTest = double(hsi.data);
 mask = double(hsi.map);
 % param:d
-numb_dimension = 4; % los-angeles-1
-% numb_dimension = 5; % los-angeles-2
-% numb_dimension = 17; % gulfport 
-% numb_dimension = 15; % texas-goast
-% numb_dimension = 15; % cat-island
-% numb_dimension = 4; % pavia
+numb_dimension = 5;
+opts.lambda = 0.001;
+lambda = 0.1;
 
 DataTest = PCA_img(DataTest, numb_dimension);
 [H,W,Dim]=size(DataTest);
@@ -45,31 +42,26 @@ X=DataTest;
 disp('Running PCA-TLRSR, Please wait...')
 
 % param:λ 
-opts.lambda = 0.06; % los-angeles-1
+
 % opts.lambda = 0.06; % los-angeles-2
 % opts.lambda = 0.06; % gulfport 
 % opts.lambda= 0.06; % texas-goast
 % opts.lambda = 0.06; % cat-island
 % opts.lambda = 0.05; % pavia
 
-opts.mu = 1e-4;
-opts.tol = 1e-8;
+opts.mu = 1e-5;
+opts.tol = 1e-4;
 opts.rho = 1.1;
 opts.max_iter = 100;
-opts.DEBUG = 0;
+opts.DEBUG = 1;
 
 tic;
 [ L,S,rank] = dictionary_learning_tlrr( X, opts);
 max_iter=100;
-Debug = 0;
+Debug = 1;
 
 % param:λ' 
-lambda = 0.01; % los-angeles-1
-% lambda = 0.01; % los-angeles-2
-% lambda = 0.05; % gulfport 
-% lambda= 0.02; % texas-goast
-% lambda = 0.05; % cat-island
-% lambda = 0.01; % pavia
+
 
 [Z,tlrr_E,Z_rank,err_va ] = TLRSR(X,L,max_iter,lambda,Debug);
 toc;

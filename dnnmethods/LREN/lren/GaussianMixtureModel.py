@@ -9,7 +9,7 @@ class GaussianMixtureModel:
         self.training = False
 
     def create_variables(self, n_features):
-        with tf.variable_scope("GMM"):
+        with tf.compat.v1.variable_scope("GMM"):
             Phi = tf.Variable(tf.zeros(shape=[self.n_comp]),
                 dtype=tf.float32, name="Phi")
             Mu = tf.Variable(tf.zeros(shape=[self.n_comp, n_features]),
@@ -24,11 +24,11 @@ class GaussianMixtureModel:
         return Phi, Mu, Sigma, L_Cholesky
 
     def Gaussian_Mixture_Model_Parameter_Estimation(self, z, gamma):
-        with tf.variable_scope("Gaussian_Mixture_Model"):
+        with tf.compat.v1.variable_scope("Gaussian_Mixture_Model"):
 
             # Calculate Mu, Sigma with Einstein summation convention
-            gamma_sum = tf.reduce_sum(gamma, axis=0)
-            self.Phi = Phi = tf.reduce_mean(gamma, axis=0)
+            gamma_sum = tf.reduce_sum(input_tensor=gamma, axis=0)
+            self.Phi = Phi = tf.reduce_mean(input_tensor=gamma, axis=0)
             self.Mu = Mu = tf.einsum('ik,il->kl', gamma, z) / gamma_sum[:,None]
             z_centered = tf.sqrt(gamma[:,:,None]) * (z[:,None,:] - Mu[None,:,:])
             self.Sigma = Sigma = tf.einsum(
@@ -36,8 +36,8 @@ class GaussianMixtureModel:
 
             # Cholesky decomposition
             n_features = z.shape[1]
-            min_vals = tf.diag(tf.ones(n_features, dtype=tf.float32)) * 1e-6
-            self.L_Cholesky = tf.cholesky(Sigma + min_vals[None,:,:])
+            min_vals = tf.linalg.tensor_diag(tf.ones(n_features, dtype=tf.float32)) * 1e-6
+            self.L_Cholesky = tf.linalg.cholesky(Sigma + min_vals[None,:,:])
 
         self.training = False
 
@@ -45,10 +45,10 @@ class GaussianMixtureModel:
         Phi, Mu, Sigma, L_Cholesky = self.create_variables(self.Mu.shape[1])
 
         op = tf.group(
-            tf.assign(Phi, self.Phi),
-            tf.assign(Mu, self.Mu),
-            tf.assign(Sigma, self.Sigma),
-            tf.assign(L_Cholesky, self.L_Cholesky)
+            tf.compat.v1.assign(Phi, self.Phi),
+            tf.compat.v1.assign(Mu, self.Mu),
+            tf.compat.v1.assign(Sigma, self.Sigma),
+            tf.compat.v1.assign(L_Cholesky, self.L_Cholesky)
         )
 
         self.Phi, self.Phi_org = Phi, self.Phi
@@ -64,19 +64,19 @@ class GaussianMixtureModel:
         if self.training and self.Phi is None:
             self.Phi, self.Mu, self.Sigma, self.L_Cholesky = self.create_variable(z.shape[1])
 
-        with tf.variable_scope("Gaussian_Mixture_Model_Energy"):
+        with tf.compat.v1.variable_scope("Gaussian_Mixture_Model_Energy"):
             z_centered = z[:,None,:] - self.Mu[None,:,:]  #ikl
-            v = tf.matrix_triangular_solve(self.L_Cholesky, tf.transpose(z_centered, [1, 2, 0]))  # kli
-            log_det_Sigma = 2.0 * tf.reduce_sum(tf.log(tf.matrix_diag_part(self.L_Cholesky)), axis=1)
+            v = tf.linalg.triangular_solve(self.L_Cholesky, tf.transpose(a=z_centered, perm=[1, 2, 0]))  # kli
+            log_det_Sigma = 2.0 * tf.reduce_sum(input_tensor=tf.math.log(tf.linalg.diag_part(self.L_Cholesky)), axis=1)
             d = z.get_shape().as_list()[1]
-            logits = tf.log(self.Phi[:,None]) - 0.5 * (tf.reduce_sum(tf.square(v), axis=1)
-                + d * tf.log(2.0 * np.pi) + log_det_Sigma[:,None])
-            energies = - tf.reduce_logsumexp(logits, axis=0)
+            logits = tf.math.log(self.Phi[:,None]) - 0.5 * (tf.reduce_sum(input_tensor=tf.square(v), axis=1)
+                + d * tf.math.log(2.0 * np.pi) + log_det_Sigma[:,None])
+            energies = - tf.reduce_logsumexp(input_tensor=logits, axis=0)
 
         return energies
 
     def Cov_Diag_Loss(self):
-        with tf.variable_scope("Gaussian_Mixture_Model_Diag_Loss"):
-            diag_loss = tf.reduce_sum(tf.divide(1, tf.matrix_diag_part(self.Sigma)))
+        with tf.compat.v1.variable_scope("Gaussian_Mixture_Model_Diag_Loss"):
+            diag_loss = tf.reduce_sum(input_tensor=tf.divide(1, tf.linalg.diag_part(self.Sigma)))
 
         return diag_loss

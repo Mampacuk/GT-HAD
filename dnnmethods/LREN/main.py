@@ -7,19 +7,11 @@ os.environ['KMP_WARNINGS'] = '0'
 
 import tensorflow as tf
 import numpy as np
-from sklearn.datasets import make_blobs
-from datetime import datetime
 import scipy.io as sio
-# import cv2
-from sklearn.decomposition import PCA, KernelPCA
 from lren import LREN
-import matplotlib.pyplot as plt
-from sklearn.metrics import precision_recall_fscore_support
-from sklearn import metrics
 from sklearn.metrics import roc_auc_score, accuracy_score, recall_score, confusion_matrix, roc_curve
 from lrr.lrr import lrr
 import time
-import pdb
 
 os.environ["CUDA_VISIBLE_DEVICES"] = '0'
 data_dir = '../../data/'
@@ -36,6 +28,9 @@ def parameter_setting(file):
         Lam = 0.001
         epoch_size = 1000
     elif file == 'cat-island' or file == 'pavia':
+        Lam = 1.0
+        epoch_size = 1000
+    else:
         Lam = 1.0
         epoch_size = 1000
     clusters_num = 7
@@ -67,7 +62,7 @@ def main(file):
     anomal_target_map = np.array(anomal_target_map)
 
     normal_data=data
-    tf.reset_default_graph()
+    tf.compat.v1.reset_default_graph()
         
     start = time.time()
     model_lren = LREN([400,hidden_nodes], tf.nn.tanh, est_hiddens=[60,clusters_num], 
@@ -101,7 +96,6 @@ def main(file):
 
         
 if __name__ == '__main__':
-    for file in ['pavia']: 
-        #     ['los-angeles-1', 'los-angeles-2', 'gulfport', 
-        # 'texas-goast', 'cat-island', 'pavia']:
+    # for file in ['los-angeles-1', 'los-angeles-2', 'gulfport', 'texas-goast', 'cat-island', 'pavia']:
+    for file in ['porcine1_348x260x31']:
         main(file)

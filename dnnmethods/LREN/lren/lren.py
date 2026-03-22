@@ -1,10 +1,10 @@
 import tensorflow as tf
 import numpy as np
 from sklearn.preprocessing import StandardScaler
-from sklearn.externals import joblib
-from lren.SpectralMappingNet import SpectralMappingNet
-from lren.DensityEstimationNet import DensityEstimationNet
-from lren.GaussianMixtureModel import GaussianMixtureModel
+import joblib
+from dnnmethods.LREN.lren.SpectralMappingNet import SpectralMappingNet
+from dnnmethods.LREN.lren.DensityEstimationNet import DensityEstimationNet
+from dnnmethods.LREN.lren.GaussianMixtureModel import GaussianMixtureModel
 import pdb 
 
 
@@ -52,12 +52,12 @@ class LREN:
         with tf.Graph().as_default() as graph:
             self.graph = graph
             # tf.random.set_seed(self.seed)
-            tf.set_random_seed(self.seed)
+            tf.compat.v1.set_random_seed(self.seed)
             np.random.seed(seed=self.seed)
 
-            self.input = input = tf.placeholder(
+            self.input = input = tf.compat.v1.placeholder(
                 dtype=tf.float32, shape=[None, n_features])
-            self.drop = drop = tf.placeholder(dtype=tf.float32, shape=[])
+            self.drop = drop = tf.compat.v1.placeholder(dtype=tf.float32, shape=[])
 
             z, x_dash  = self.comp_net.inference(input)
             
@@ -72,16 +72,16 @@ class LREN:
             self.x_dash = x_dash
 
             loss = (self.comp_net.reconstruction_error(input, x_dash) +
-                self.lambda1 * tf.reduce_mean(energy) +
+                self.lambda1 * tf.reduce_mean(input_tensor=energy) +
                 self.lambda2 * self.gmm.Cov_Diag_Loss())
             rec_loss = self.comp_net.reconstruction_error(input, x_dash)
-            minimizer = tf.train.AdamOptimizer(self.learning_rate).minimize(loss)
-            rec_minimizer = tf.train.AdamOptimizer(self.learning_rate).minimize(rec_loss)
+            minimizer = tf.compat.v1.train.AdamOptimizer(self.learning_rate).minimize(loss)
+            rec_minimizer = tf.compat.v1.train.AdamOptimizer(self.learning_rate).minimize(rec_loss)
             n_batch = (n_samples - 1) // self.minibatch_size + 1
 
-            init = tf.global_variables_initializer()
+            init = tf.compat.v1.global_variables_initializer()
 
-            self.sess = tf.Session(graph=graph)
+            self.sess = tf.compat.v1.Session(graph=graph)
             self.sess.run(init)
 
             idx = np.arange(x.shape[0])
@@ -99,6 +99,7 @@ class LREN:
 
                 if (epoch + 1) % 10 == 0:
                     loss_val = self.sess.run(loss, feed_dict={input:x, drop:0})
+                    print(f'Loss at epoch {epoch + 1}: {loss_val}')
                     if loss_val < 0:
                         print('Stop Training')
                         return

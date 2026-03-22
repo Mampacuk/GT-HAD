@@ -113,6 +113,9 @@ tol = sqrt(N)*1e-5;
 iter = 1;
 res = inf;
 while (iter <= maxIter) && (sum(abs(res)) > tol)
+    % print progress
+    currentDateTime = datetime('now', 'Format', 'yyyy-MM-dd HH:mm:ss');
+    fprintf('%s: iter %d\n', string(currentDateTime), iter);
     
     % solve the quadratic step (all terms depending on X)
     Xi = A'*(Y-D{1}-S);

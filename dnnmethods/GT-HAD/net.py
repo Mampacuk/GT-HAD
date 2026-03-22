@@ -33,9 +33,8 @@ class Attention(nn.Module):
         self.embed_dim = dim 
         self.hidden_dim = self.embed_dim // 2
         self.fc = nn.Linear(self.embed_dim, self.hidden_dim, bias=True)
+        self.N = self.pstride ** 2
         self.scale = (self.hidden_dim * self.psize ** 2) ** -0.5
-        # creat a mask for the calculations of AFB and BFB
-        self.N = self.psize * self.pstride # patch num
         self.mask = torch.eye(self.N).cuda()
         self.mask[self.mask == 1] = -100.0
 
@@ -67,7 +66,7 @@ class Attention(nn.Module):
 
     def forward(self, x, block_idx=0, match_vec=None):
         B, H, W, C = x.shape
-        N = self.N
+        N = self.pstride ** 2
         P = self.psize ** 2
 
         # attention calculation
